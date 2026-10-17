@@ -96,15 +96,16 @@ table.grid { width: 100%; border-collapse: collapse; }
 .detay .grid tbody tr { cursor: pointer; }
 .detay .grid tbody tr.yesil td { background: var(--green-soft); }
 .detay .grid tbody tr.nakit td { background: var(--green-soft); }
-.detay .grid tbody tr.serbest td { background: var(--mor-soft); }
-.detay .grid tbody tr.secili td { background: #fbe3e4; }
+/* seçim zemin rengini ezmez, üstüne yarı saydam mavi katman biner; serbest stok satırı boyamaz, solda mor nokta gösterir */
+.detay .grid tbody tr.serbest td:nth-child(2) { position: relative; }
+.detay .grid tbody tr.serbest td:nth-child(2)::after { content: ''; position: absolute; left: 2px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: #7c3aed; }
 .detay .grid tbody tr.odak td { font-weight: 600; background-image: linear-gradient(var(--red), var(--red)); background-repeat: no-repeat; background-size: 100% 1px; background-position: bottom; }
 .detay .grid tbody tr.odak td:first-child { box-shadow: inset 3px 0 0 var(--red); }
 .cin { width: 100%; height: 26px; border: 1px solid transparent; background: transparent; border-radius: 3px; padding: 0 6px; color: inherit; font: inherit; font-size: 13px; min-width: 90px; }
 .cin:hover { border-color: var(--line); background: #fff; }
 .renkler { flex: none; display: flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); background: var(--panel); border-radius: 0 0 4px 4px; }
 .rk { width: 12px; height: 12px; border-radius: 2px; display: inline-block; margin-left: 12px; border: 1px solid rgba(0, 0, 0, .06); }
-.rk.yesil { background: var(--green-soft); } .rk.nakit { background: var(--green-soft); } .rk.serbest { background: var(--mor-soft); } .rk.secili { background: #fbe3e4; }
+.rk.yesil { background: var(--green-soft); } .rk.nakit { background: var(--green-soft); } .rk.serbest { background: #7c3aed; border-radius: 50%; width: 10px; height: 10px; } .rk.secili { background: #cfe5f6; border-color: var(--mavi); }
 
 .durum { flex: none; display: flex; align-items: center; gap: 10px; padding: 8px 20px; background: var(--panel); border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
 .durum b { color: var(--text); font-family: var(--mono); font-weight: 600; }
@@ -263,3 +264,9 @@ table.grid { width: 100%; border-collapse: collapse; }
 @media (max-width: 1250px) { .cmdbar { flex-wrap: wrap; } .filtre-etiket { display: none; } }
 .kbar .kt small b { color: var(--text); font-weight: 600; }
 .cmdbar .ikon-btn.yenile { color: var(--mavi); }
+.detay .grid tbody tr.secili:not(.odak) td:first-child { box-shadow: inset 3px 0 0 var(--mavi); }
+
+/* seçili satır: dolgun mavi zemin + kalın sol çubuk + kalın yazı (diğer satır renklerinin üstüne çıkar) */
+.detay .grid tbody tr.secili td { background-color: #cfe5f6 !important; font-weight: 600; }
+.detay .grid tbody tr.secili td:first-child { box-shadow: inset 4px 0 0 var(--mavi); }
+.detay .grid tbody tr.odak.secili td:first-child { box-shadow: inset 4px 0 0 var(--red); }

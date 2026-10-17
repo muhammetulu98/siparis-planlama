@@ -479,7 +479,7 @@ const sutunlar = (sekme: 'ozet' | 'detay') => (sekme === 'ozet' ? ozetKol.value 
             <thead><tr><th v-for="k in gorunurDetay" :key="k.k" :style="{ minWidth: (k.w ?? 90) + 'px' }" :class="{ sag: sagaMi(k) }"><template v-if="k.k === 'sec'"><input type="checkbox" class="chk" title="Tümünü seç" :checked="hepsiSecili" :disabled="!detaySatirlari.length" @change="tumunuSec(($event.target as HTMLInputElement).checked)" /></template><template v-else>{{ k.ad }}</template></th></tr></thead>
             <tbody>
               <tr v-for="r in detaySatirlari" :key="r.id"
-                  :class="{ odak: odakSatir === r.id, yesil: r.yesilmi || r.iskonto2 > 0, nakit: r.nakitmi, serbest: r.serbest > 0 && !r.sec }"
+                  :class="{ odak: odakSatir === r.id, yesil: r.yesilmi || r.iskonto2 > 0, nakit: r.nakitmi, secili: r.sec, serbest: r.serbest > 0 && !r.sec }"
                   @click="odakSatir = r.id" @dblclick="dlg = { tip: 'stok' }">
                 <td v-for="k in gorunurDetay" :key="k.k" :class="{ sag: sagaMi(k), mono: k.tip === 'tutar' }">
                   <input v-if="k.k === 'sec'" type="checkbox" class="chk" :checked="r.sec" @change="satirBul(r.id)!.sec = ($event.target as HTMLInputElement).checked" @click.stop />
@@ -491,7 +491,7 @@ const sutunlar = (sekme: 'ozet' | 'detay') => (sekme === 'ozet' ? ozetKol.value 
                   <input v-else-if="k.k === 'terminTarihi'" type="date" class="cin" :value="r.terminTarihi" @change="satirBul(r.id)!.terminTarihi = ($event.target as HTMLInputElement).value" @click.stop />
                   <span v-else-if="k.k === 'oneri'" class="chip" :class="seviyeSinif(r._oneri.seviye)" :title="r._oneri.gerekce">{{ r._oneri.etiket }}</span>
                   <span v-else-if="k.k === 'uyari'" class="uyarilar">
-                    <span v-for="u in r._oneri.uyarilar.filter(x => x.seviye !== 'bilgi')" :key="u.kod" class="chip" :class="u.seviye === 'kritik' ? 'bad' : 'warn'" :title="u.metin">{{ u.kod === 'terminGecti' ? 'Termin geçti' : u.kod === 'terminYakin' ? 'Termin yakın' : 'Stok yarışı' }}</span>
+                    <span v-for="u in r._oneri.uyarilar.filter(x => x.seviye !== 'bilgi')" :key="u.kod" class="chip" :class="u.seviye === 'kritik' ? 'bad' : 'warn'" :title="u.metin">{{ u.etiket }}</span>
                   </span>
                   <template v-else>{{ hucre(k, r) }}</template>
                 </td>
@@ -500,7 +500,7 @@ const sutunlar = (sekme: 'ozet' | 'detay') => (sekme === 'ozet' ? ozetKol.value 
             </tbody>
           </table>
         </div>
-        <div class="renkler"><span class="rk nakit" />Nakit <span class="rk serbest" />Serbest stok var, seçilmemiş</div>
+        <div class="renkler"><span class="rk nakit" />Nakit <span class="rk secili" />Seçili <span class="rk serbest" />Serbest stok var, seçilmemiş</div>
       </section>
 
       <div class="sag-kol">

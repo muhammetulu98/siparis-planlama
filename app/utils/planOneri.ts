@@ -25,7 +25,9 @@ export const KURALLAR = {
 export type Seviye = 'ok' | 'dikkat' | 'kritik'
 export type OneriTuru = 'depo' | 'bol' | 'bekle' | 'sevk'
 
-export interface Uyari { kod: 'terminGecti' | 'terminYakin' | 'rekabet' | 'nakit' | 'yesil', metin: string, seviye: 'kritik' | 'dikkat' | 'bilgi' }
+export type UyariKod = 'terminGecti' | 'terminRisk' | 'teslimYetismiyor' | 'nakitStoksuz' | 'terminYakin' | 'rekabet' | 'nakit' | 'yesil'
+/** etiket: grid'deki kısa chip metni, metin: ayrıntılı açıklama (tooltip / modal) */
+export interface Uyari { kod: UyariKod, etiket: string, metin: string, seviye: 'kritik' | 'dikkat' | 'bilgi' }
 
 export interface Oneri {
   satirId: number
@@ -58,18 +60,37 @@ export function depoSerbest(st: Stok, depoNo: number): number {
   return d ? Math.max(0, d.miktar - d.planlanmis) : 0
 }
 
-/** Satırın uyarıları (Katman 2). */
+/**
+ * Satırın uyarıları (Katman 2).
+ * İlke: tek başına anlamsız bilgiyi (ör. "termin yakın") uyarı yapmayız; sorun ancak başka bir durumla
+ * birleşince uyarıdır. Termin yakınsa ve stok yetiyorsa sorun yok; stok yetmiyorsa "termin riski" olur.
+ */
 export function satirUyarilari(s: Satir, st: Stok, bugun: string): Uyari[] {
   const u: Uyari[] = []
-  const fark = gunFarki(s.terminTarihi, bugun)
-  if (fark < 0) u.push({ kod: 'terminGecti', metin: `Termin ${Math.abs(fark)} gün geçti`, seviye: 'kritik' })
-  else if (fark <= KURALLAR.terminYakinGun) u.push({ kod: 'terminYakin', metin: fark === 0 ? 'Termin bugün' : `Termine ${fark} gün kaldı`, seviye: 'dikkat' })
+  const katsayi = st.birimler.find(b => b.ad === s.birim)?.katsayi ?? 1
+  const gerekli = s.miktar * katsayi
   const toplamSerbest = KURALLAR.depoSirasi.reduce((t, no) => t + depoSerbest(st, no), 0)
-  if (st.planlanmamis > toplamSerbest) {
-    u.push({ kod: 'rekabet', metin: `Bu stok için bekleyen siparişler (${adet(st.planlanmamis)}) serbest stoktan (${adet(toplamSerbest)}) fazla`, seviye: 'dikkat' })
+  const eksik = Math.max(0, gerekli - toplamSerbest)
+  const fark = gunFarki(s.terminTarihi, bugun)
+  const yakin = fark <= KURALLAR.terminYakinGun
+  const gunMetni = fark === 0 ? 'bugün' : `${fark} gün sonra`
+
+  if (fark < 0) u.push({ kod: 'terminGecti', etiket: `Termin ${Math.abs(fark)} gün geçti`, metin: `Termin ${Math.abs(fark)} gün önce geçti.`, seviye: 'kritik' })
+  else if (yakin && eksik > 0) u.push({ kod: 'terminRisk', etiket: `Termin riski · ${adet(eksik)} eksik`, metin: `Termin ${gunMetni}, ama depolardaki serbest stok yetmiyor (${adet(eksik)} adet eksik).`, seviye: 'kritik' })
+  else if (yakin) u.push({ kod: 'terminYakin', etiket: 'Termin yakın', metin: `Termin ${gunMetni}; stok yeterli, planlanabilir.`, seviye: 'bilgi' })
+
+  // Stok yetmiyor ve gelecek satınalma termine yetişmiyor: bekleyerek çözülmez, Yerinden/Transit gerekir
+  if (eksik > 0 && st.satinalma > 0 && st.satinalmaTeslim && st.satinalmaTeslim > s.terminTarihi) {
+    u.push({ kod: 'teslimYetismiyor', etiket: 'Satınalma geç kalıyor', metin: `Satınalma teslimi ${st.satinalmaTeslim.split('-').reverse().join('.')}, satır termini ${s.terminTarihi.split('-').reverse().join('.')}. Beklemek termini kaçırtır.`, seviye: 'kritik' })
   }
-  if (s.nakitmi) u.push({ kod: 'nakit', metin: 'Nakit satır: öncelikli', seviye: 'bilgi' })
-  if (s.yesilmi) u.push({ kod: 'yesil', metin: 'Yeşil satır', seviye: 'bilgi' })
+
+  if (s.nakitmi && eksik > 0) u.push({ kod: 'nakitStoksuz', etiket: 'Nakit satır stoksuz', metin: `Nakit müşteri ve ${adet(eksik)} adet eksik: tahsilat bekliyor, önce bu satırın stoğu çözülmeli.`, seviye: 'kritik' })
+
+  if (st.planlanmamis > toplamSerbest) {
+    u.push({ kod: 'rekabet', etiket: 'Stok yarışı', metin: `Bu stok için bekleyen siparişler (${adet(st.planlanmamis)}) serbest stoktan (${adet(toplamSerbest)}) fazla: hepsi karşılanamaz.`, seviye: 'dikkat' })
+  }
+  if (s.nakitmi) u.push({ kod: 'nakit', etiket: 'Nakit', metin: 'Nakit satır: öncelikli', seviye: 'bilgi' })
+  if (s.yesilmi) u.push({ kod: 'yesil', etiket: 'Yeşil', metin: 'Yeşil satır', seviye: 'bilgi' })
   return u
 }
 

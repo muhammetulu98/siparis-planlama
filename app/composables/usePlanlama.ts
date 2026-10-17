@@ -6,7 +6,7 @@ export interface DepoBilgi { miktar: number, planlanmis: number }
 export interface StokBirim { ad: string, katsayi: number }
 export interface Stok {
   kod: string, ad: string, birimler: StokBirim[], tedarikci: string, anaKategori: string, urunSorumlusu: string,
-  kaliteKontrol: string, fizikselDurum: string, birimFiyat: number, satinalma: number, planlanmamis: number,
+  kaliteKontrol: string, fizikselDurum: string, birimFiyat: number, satinalma: number, satinalmaTeslim: string, planlanmamis: number,
   depolar: Record<number, DepoBilgi>, aciklamalar: [string, string, string, string]
 }
 
@@ -76,7 +76,7 @@ const ST = (kod: string, ad: string, p: Partial<Stok> & { koli: number, ikitelli
   birimler: [{ ad: 'Adet', katsayi: 1 }, { ad: 'Koli', katsayi: p.koli }, { ad: 'Palet', katsayi: p.koli * 20 }],
   tedarikci: p.tedarikci ?? '', anaKategori: p.anaKategori ?? '', urunSorumlusu: p.urunSorumlusu ?? URUN_SORUMLULARI[0]!,
   kaliteKontrol: p.kaliteKontrol ?? KALITE_KONTROLCULER[0]!, fizikselDurum: p.fizikselDurum ?? 'Hazır',
-  birimFiyat: p.birimFiyat ?? 0, satinalma: p.satinalma ?? 0, planlanmamis: p.planlanmamis ?? 0,
+  birimFiyat: p.birimFiyat ?? 0, satinalma: p.satinalma ?? 0, satinalmaTeslim: p.satinalma ? '2026-10-24' : '', planlanmamis: p.planlanmamis ?? 0,
   depolar: {
     3: { miktar: p.ikitelli, planlanmis: p.planIk ?? 0 },
     83: { miktar: p.plaza, planlanmis: p.planPl ?? 0 },
