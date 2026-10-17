@@ -16,7 +16,19 @@ Gerekli = miktar × birim katsayısı (adet). Serbest(depo) = depo miktarı − 
 5. Toplam yetmiyor, satınalma yoksa → `sevk` = Yerinden/Transit (kritik)
 
 ## Uyarılar (satır)
-Termin geçti (kritik) · termin ≤3 gün (dikkat) · stok yarışı: bu stok için planlanmamış siparişler > toplam serbest (dikkat) · nakit, yeşil (bilgi).
+İlke: tek başına anlamsız bilgi uyarı olmaz; sorun ancak başka bir durumla birleşince uyarıdır. Kod: `satirUyarilari`. Her uyarının kısa bir `etiket`i (grid'de chip) ve ayrıntılı `metin`i (tooltip) vardır.
+
+| Kod | Ne zaman | Seviye |
+|---|---|---|
+| `terminGecti` | Termin geçmiş | kritik |
+| `terminRisk` | Termin ≤ 3 gün **ve** iki depodaki toplam serbest stok satırı karşılamıyor (eksik miktar yazılır) | kritik |
+| `teslimYetismiyor` | Stok yetmiyor, satınalma var ama teslim tarihi satır terminden sonra: beklemek terminı kaçırtır | kritik |
+| `nakitStoksuz` | Nakit satır ve stok eksik: tahsilat bekliyor | kritik |
+| `rekabet` ("Stok yarışı") | Bu stok için planlanmamış siparişler toplam serbest stoktan fazla | dikkat |
+| `terminYakin` | Termin ≤ 3 gün ama stok yeterli: sorun yok | bilgi (grid'de gösterilmez) |
+| `nakit`, `yesil` | Nakit / yeşil satır | bilgi |
+
+Gerekli ek veri: stokun en yakın satınalma teslim tarihi (`satinalmaTeslim`).
 
 ## Sipariş önceliği (puan → Yüksek ≥4, Orta ≥2, Normal)
 Nakit satır +3 · onaylanalı >7 gün +3 · termin geçmiş +3 (yoksa yaklaşan +2) · yeşil satır +1.
@@ -28,7 +40,7 @@ Eşikler ve puanlar `KURALLAR` sabitinde, iş birimiyle netleştirilecek.
 { "oncelik": { "puan": 6, "seviye": "Yüksek", "nedenler": ["Nakit satır var"] },
   "satirlar": [ { "satirId": 101, "tur": "depo|bol|bekle|sevk", "depoNo": 3, "etiket": "İkitelli ✓",
                   "gerekce": "...", "seviye": "ok|dikkat|kritik", "eksikAdet": 0, "bolmeKalan": 0,
-                  "uyarilar": [ { "kod": "terminYakin", "metin": "...", "seviye": "dikkat" } ] } ] }
+                  "uyarilar": [ { "kod": "terminRisk", "etiket": "Termin riski · 16 eksik", "metin": "...", "seviye": "kritik" } ] } ] }
 ```
 Gerekli veri: satır (miktar, birim, depo, termin, nakit/yeşil), stok (depo miktarı, planlanmış, planlanmamış toplam, satınalma, birim katsayıları), siparişin onaylanma zamanı.
 
