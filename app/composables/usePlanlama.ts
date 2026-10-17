@@ -171,6 +171,7 @@ export const OZET_KOLONLARI = (): Kolon[] => [
 ]
 
 export const DETAY_KOLONLARI = (): Kolon[] => [
+  { k: 'sec', ad: 'Seç', tip: 'bool', vis: true, w: 44 },
   { k: 'stokKodu', ad: 'Stok Kodu', vis: true, w: 90 }, { k: 'stokAdi', ad: 'Stok Adı', vis: true, w: 220 },
   { k: 'miktar', ad: 'Miktar', tip: 'sayi', vis: true, w: 80 }, { k: 'birim', ad: 'Birim', vis: true, w: 60 },
   { k: 'depoNo', ad: 'Depo', vis: true, w: 100 },

@@ -473,17 +473,17 @@ const sutunlar = (sekme: 'ozet' | 'detay') => (sekme === 'ozet' ? ozetKol.value 
     <div class="alt">
       <section class="kutu detay">
         <div class="kbas">Sipariş Detayı <small v-if="seciliSiparis">{{ anahtar(seciliSiparis) }} · {{ seciliSiparis.cariUnvan }} · {{ detaySatirlari.length }} satır · {{ secilenSatirlar.length }} seçili</small>
-          <button v-if="detaySatirlari.length" class="tumunu-sec" @click="tumunuSec(!hepsiSecili)">{{ hepsiSecili ? 'Seçimi temizle' : 'Tümünü seç' }}</button>
         </div>
         <div class="gwrap">
           <table class="grid">
-            <thead><tr><th v-for="k in gorunurDetay" :key="k.k" :style="{ minWidth: (k.w ?? 90) + 'px' }" :class="{ sag: sagaMi(k) }">{{ k.ad }}</th></tr></thead>
+            <thead><tr><th v-for="k in gorunurDetay" :key="k.k" :style="{ minWidth: (k.w ?? 90) + 'px' }" :class="{ sag: sagaMi(k) }"><template v-if="k.k === 'sec'"><input type="checkbox" class="chk" title="Tümünü seç" :checked="hepsiSecili" :disabled="!detaySatirlari.length" @change="tumunuSec(($event.target as HTMLInputElement).checked)" /></template><template v-else>{{ k.ad }}</template></th></tr></thead>
             <tbody>
               <tr v-for="r in detaySatirlari" :key="r.id"
-                  :class="{ odak: odakSatir === r.id, yesil: r.yesilmi || r.iskonto2 > 0, nakit: r.nakitmi, secili: r.sec, serbest: r.serbest > 0 && !r.sec }"
-                  @click="odakSatir = r.id; satirBul(r.id)!.sec = !r.sec" @dblclick="dlg = { tip: 'stok' }">
+                  :class="{ odak: odakSatir === r.id, yesil: r.yesilmi || r.iskonto2 > 0, nakit: r.nakitmi, serbest: r.serbest > 0 && !r.sec }"
+                  @click="odakSatir = r.id" @dblclick="dlg = { tip: 'stok' }">
                 <td v-for="k in gorunurDetay" :key="k.k" :class="{ sag: sagaMi(k), mono: k.tip === 'tutar' }">
-                  <input v-if="k.k === 'nakitmi'" type="checkbox" class="chk" :checked="r.nakitmi" @change="satirBul(r.id)!.nakitmi = ($event.target as HTMLInputElement).checked" @click.stop />
+                  <input v-if="k.k === 'sec'" type="checkbox" class="chk" :checked="r.sec" @change="satirBul(r.id)!.sec = ($event.target as HTMLInputElement).checked" @click.stop />
+                  <input v-else-if="k.k === 'nakitmi'" type="checkbox" class="chk" :checked="r.nakitmi" @change="satirBul(r.id)!.nakitmi = ($event.target as HTMLInputElement).checked" @click.stop />
                   <input v-else-if="k.tip === 'bool'" type="checkbox" class="chk" :checked="!!(r as any)[k.k]" disabled />
                   <select v-else-if="k.k === 'depoNo'" class="cin" :value="r.depoNo" @change="satirBul(r.id)!.depoNo = Number(($event.target as HTMLSelectElement).value)" @click.stop>
                     <option v-for="d in DEPOLAR" :key="d.no" :value="d.no">{{ d.ad }}</option>
@@ -500,7 +500,7 @@ const sutunlar = (sekme: 'ozet' | 'detay') => (sekme === 'ozet' ? ozetKol.value 
             </tbody>
           </table>
         </div>
-        <div class="renkler"><span class="rk nakit" />Nakit <span class="rk secili" />Seçili <span class="rk serbest" />Serbest stok var, seçilmemiş</div>
+        <div class="renkler"><span class="rk nakit" />Nakit <span class="rk serbest" />Serbest stok var, seçilmemiş</div>
       </section>
 
       <div class="sag-kol">
@@ -562,7 +562,7 @@ const sutunlar = (sekme: 'ozet' | 'detay') => (sekme === 'ozet' ? ozetKol.value 
     <span>{{ ozetListesi.length }} sipariş · {{ toplamSatir }} satır</span>
     <span v-if="seciliSiparis">· Seçili sipariş <b>{{ anahtar(seciliSiparis) }}</b> · {{ secilenSatirlar.length }} satır seçili</span>
     <span class="sp" />
-    <span class="ipucu">F5 yenile · Ctrl+Enter planla · ↑↓ sipariş · Satıra tıkla seç · Ctrl+A tümünü seç</span>
+    <span class="ipucu">F5 yenile · Ctrl+Enter planla · ↑↓ sipariş · Boşluk satır seç · Ctrl+A tümünü seç</span>
   </footer>
 
   <!-- pencereler -->
